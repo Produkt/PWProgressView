@@ -60,6 +60,15 @@ static const CFTimeInterval PWScaleAnimationDuration    = 0.5;
     CGFloat centerHoleInset     = PWCenterHoleInsetRatio * CGRectGetWidth(self.bounds);
     CGFloat progressShapeInset  = PWProgressShapeInsetRatio * CGRectGetWidth(self.bounds);
     
+    CGSize pathSize=CGSizeZero;
+    if (CGRectGetWidth(self.bounds)>CGRectGetHeight(self.bounds)) {
+        pathSize.height=CGRectGetHeight(self.bounds);
+        pathSize.width=CGRectGetHeight(self.bounds);
+    }else{
+        pathSize.height=CGRectGetWidth(self.bounds);
+        pathSize.width=CGRectGetWidth(self.bounds);
+    }
+    
     CGRect pathRect = CGRectMake(CGPointZero.x,
                                  CGPointZero.y,
                                  CGRectGetWidth(self.bounds),
@@ -67,23 +76,23 @@ static const CFTimeInterval PWScaleAnimationDuration    = 0.5;
     
     UIBezierPath *path = [UIBezierPath bezierPathWithRect:pathRect];
     
-    [path appendPath:[UIBezierPath bezierPathWithRoundedRect:CGRectMake(centerHoleInset,
-                                                                        centerHoleInset,
-                                                                        CGRectGetWidth(self.bounds) - centerHoleInset * 2,
-                                                                        CGRectGetHeight(self.bounds) - centerHoleInset * 2)
-                                                cornerRadius:(CGRectGetWidth(self.bounds) - centerHoleInset * 2) / 2.0f]];
+    CGRect holePathRect=CGRectZero;
+    holePathRect.size=CGSizeMake(pathSize.width - centerHoleInset * 2, pathSize.height - centerHoleInset * 2);
+    holePathRect.origin=CGPointMake((CGRectGetWidth(pathRect)-CGRectGetWidth(holePathRect))/2, (CGRectGetHeight(pathRect)-CGRectGetHeight(holePathRect))/2);
+    [path appendPath:[UIBezierPath bezierPathWithRoundedRect:holePathRect
+                                                cornerRadius:(pathSize.width - centerHoleInset * 2) / 2.0f]];
     
     [path setUsesEvenOddFillRule:YES];
     
     self.boxShape.path = path.CGPath;
     self.boxShape.bounds = pathRect;
     self.boxShape.position = CGPointMake(CGRectGetMidX(pathRect), CGRectGetMidY(pathRect));
-
-    CGFloat diameter = CGRectGetWidth(self.bounds) - (2 * centerHoleInset) - (2 * progressShapeInset);
+    
+    CGFloat diameter = pathSize.width - (2 * centerHoleInset) - (2 * progressShapeInset);
     CGFloat radius = diameter / 2.0f;
     
-    self.progressShape.path = [UIBezierPath bezierPathWithRoundedRect:CGRectMake((CGRectGetWidth(self.bounds) / 2.0f) - (radius / 2.0f),
-                                                                                 (CGRectGetHeight(self.bounds) / 2.0f) - (radius / 2.0f),
+    self.progressShape.path = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(CGRectGetMidX(holePathRect) - (radius / 2.0f),
+                                                                                 CGRectGetMidY(holePathRect) - (radius / 2.0f),
                                                                                  radius,
                                                                                  radius)
                                                          cornerRadius:radius].CGPath;
@@ -91,25 +100,17 @@ static const CFTimeInterval PWScaleAnimationDuration    = 0.5;
     self.progressShape.lineWidth = radius;
 }
 
-- (void)setFrame:(CGRect)frame
-{
-    [super setFrame:CGRectMake(CGRectGetMinX(frame),
-                               CGRectGetMinY(frame),
-                               CGRectGetWidth(frame),
-                               CGRectGetWidth(frame))];
-}
-
 - (void)setProgress:(float)progress
 {
     if ([self pinnedProgress:progress] != _progress) {
         self.progressShape.strokeStart = progress;
-
+        
         if (_progress == 1.0f && progress < 1.0f) {
             [self.boxShape removeAllAnimations];
         }
-
+        
         _progress = [self pinnedProgress:progress];
-
+        
         if (_progress == 1.0f) {
             CABasicAnimation *scaleAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
             scaleAnimation.toValue = @(PWScaleAnimationScaleFactor);
