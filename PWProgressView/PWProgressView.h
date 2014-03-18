@@ -9,7 +9,10 @@
 #import <UIKit/UIKit.h>
 
 @interface PWProgressView : UIView
-
-@property (nonatomic, assign) float progress;
-
+@property (nonatomic, assign) CGFloat centerHoleInsetRatio;
+@property (nonatomic, assign) CGFloat progressShapeInsetRatio;
+@property (nonatomic, assign) CGFloat progressAlpha;
+@property (nonatomic, assign) CGFloat scaleAnimationScaleFactor;
+@property (nonatomic, assign) CFTimeInterval scaleAnimationDuration;
+@property (nonatomic, assign) CGFloat progress;
 @end

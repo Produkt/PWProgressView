@@ -50,6 +50,11 @@ static const CFTimeInterval PWScaleAnimationDuration    = 0.5;
 
         [self.layer addSublayer:self.boxShape];
         [self.layer addSublayer:self.progressShape];
+        
+        self.centerHoleInsetRatio=PWCenterHoleInsetRatio;
+        self.progressShapeInsetRatio=PWProgressShapeInsetRatio;
+        self.scaleAnimationScaleFactor=PWScaleAnimationScaleFactor;
+        self.scaleAnimationDuration=PWScaleAnimationDuration;
     }
     
     return self;
@@ -57,8 +62,8 @@ static const CFTimeInterval PWScaleAnimationDuration    = 0.5;
 
 - (void)layoutSubviews
 {
-    CGFloat centerHoleInset     = PWCenterHoleInsetRatio * CGRectGetWidth(self.bounds);
-    CGFloat progressShapeInset  = PWProgressShapeInsetRatio * CGRectGetWidth(self.bounds);
+    CGFloat centerHoleInset     = self.centerHoleInsetRatio * CGRectGetWidth(self.bounds);
+    CGFloat progressShapeInset  = self.progressShapeInsetRatio * CGRectGetWidth(self.bounds);
     
     CGSize pathSize=CGSizeZero;
     if (CGRectGetWidth(self.bounds)>CGRectGetHeight(self.bounds)) {
@@ -113,8 +118,8 @@ static const CFTimeInterval PWScaleAnimationDuration    = 0.5;
         
         if (_progress == 1.0f) {
             CABasicAnimation *scaleAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
-            scaleAnimation.toValue = @(PWScaleAnimationScaleFactor);
-            scaleAnimation.duration = PWScaleAnimationDuration;
+            scaleAnimation.toValue = @(self.scaleAnimationScaleFactor);
+            scaleAnimation.duration = self.scaleAnimationDuration;
             scaleAnimation.removedOnCompletion = NO;
             scaleAnimation.autoreverses = NO;
             scaleAnimation.fillMode = kCAFillModeForwards;
